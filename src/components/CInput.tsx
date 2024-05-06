@@ -9,24 +9,39 @@ import React, {useState} from 'react';
 import {FONTS} from '../themes/Fonts';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {COLORS} from '../themes/Colors';
+import {Controller, useFormContext} from 'react-hook-form';
 type Props = {
   label?: string;
   placeholder?: string;
   icon?: string;
   isPassword?: boolean;
+  name: string;
 };
 
-const CInput = ({label, placeholder, icon, isPassword}: Props) => {
+const CInput = ({label, placeholder, icon, isPassword, name}: Props) => {
   const [isShow, setIsShow] = useState<boolean>(true);
+  const {
+    control,
+    formState: {errors},
+  } = useFormContext();
   return (
     <View>
       {label && <Text style={styles.label}>{label}</Text>}
       <View style={styles.viewInput}>
         {icon && <Ionicons name={icon} size={24} color={COLORS.PRIMARY} />}
-        <TextInput
-          placeholder={placeholder}
-          style={styles.input}
-          secureTextEntry={isPassword && isShow}
+        <Controller
+          name={name}
+          control={control}
+          render={({field: {value, onChange, onBlur}}) => (
+            <TextInput
+              placeholder={placeholder}
+              style={styles.input}
+              secureTextEntry={isPassword && isShow}
+              value={value}
+              onChangeText={onChange}
+              onBlur={onBlur}
+            />
+          )}
         />
         {isPassword && (
           <TouchableOpacity onPress={() => setIsShow(prev => !prev)}>
@@ -38,6 +53,9 @@ const CInput = ({label, placeholder, icon, isPassword}: Props) => {
           </TouchableOpacity>
         )}
       </View>
+      {errors[name] && (
+        <Text style={styles.txtError}>{errors[name]?.message ?? ''}</Text>
+      )}
     </View>
   );
 };
@@ -64,5 +82,11 @@ const styles = StyleSheet.create({
     flex: 1,
     fontFamily: FONTS.REGULAR,
     color: COLORS.BLACK,
+  },
+  txtError: {
+    fontSize: 12,
+    fontFamily: FONTS.REGULAR,
+    color: 'red',
+    marginTop: 4,
   },
 });

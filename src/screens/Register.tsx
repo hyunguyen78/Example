@@ -5,12 +5,43 @@ import {FONTS} from '../themes/Fonts';
 import CInput from '../components/CInput';
 import {COLORS} from '../themes/Colors';
 import {useNavigation} from '@react-navigation/native';
-
+import {FormProvider, useForm} from 'react-hook-form';
+import * as yup from 'yup';
+import {yupResolver} from '@hookform/resolvers/yup';
 type Props = {};
 
 const Register = (props: Props) => {
   const navigation = useNavigation<any>();
   const {top: paddingTop} = useSafeAreaInsets();
+  const form = useForm({
+    defaultValues: {
+      email: '',
+      fullName: '',
+      password: '',
+      rePassword: '',
+    },
+    resolver: yupResolver(
+      yup.object().shape({
+        email: yup
+          .string()
+          .email('Email invalid')
+          .required('Email is required'),
+        fullName: yup.string().required('Full name is required'),
+        password: yup
+          .string()
+          .min(6, 'Psasword must be at least 6 characters')
+          .required('Password is required'),
+        rePassword: yup
+          .string()
+          .oneOf([yup.ref('password'), ''], 'Password do not match')
+          .required('Please confirm your password'),
+      }),
+    ),
+  });
+
+  const handleSubmit = (values: any) => {
+    console.log('values', values);
+  };
   return (
     <View style={[styles.container, {paddingTop}]}>
       <View style={styles.viewHeader}>
@@ -21,32 +52,40 @@ const Register = (props: Props) => {
       </View>
 
       <View style={styles.viewForm}>
-        <CInput
-          label="Email"
-          placeholder="Enter your email"
-          icon="mail-outline"
-        />
-        <CInput
-          label="Full name"
-          placeholder="Enter your full name"
-          icon="text-outline"
-        />
-        <CInput
-          label="Password"
-          placeholder="Enter your password"
-          icon="lock-closed-outline"
-          isPassword
-        />
+        <FormProvider {...form}>
+          <CInput
+            label="Email"
+            placeholder="Enter your email"
+            icon="mail-outline"
+            name="email"
+          />
+          <CInput
+            label="Full name"
+            placeholder="Enter your full name"
+            icon="text-outline"
+            name="fullName"
+          />
+          <CInput
+            label="Password"
+            placeholder="Enter your password"
+            icon="lock-closed-outline"
+            isPassword
+            name="password"
+          />
 
-        <CInput
-          label="Re Password"
-          placeholder="Enter your re password"
-          icon="lock-closed-outline"
-          isPassword
-        />
+          <CInput
+            label="Re Password"
+            placeholder="Enter your re password"
+            icon="lock-closed-outline"
+            isPassword
+            name="rePassword"
+          />
+        </FormProvider>
 
         <View style={styles.viewBtn}>
-          <TouchableOpacity style={styles.btnLogin}>
+          <TouchableOpacity
+            style={styles.btnLogin}
+            onPress={() => form.handleSubmit(handleSubmit)()}>
             <Text style={styles.txtLogin}>Register</Text>
           </TouchableOpacity>
 

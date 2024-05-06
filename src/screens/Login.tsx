@@ -5,12 +5,36 @@ import {FONTS} from '../themes/Fonts';
 import CInput from '../components/CInput';
 import {COLORS} from '../themes/Colors';
 import {useNavigation} from '@react-navigation/native';
-
+import {FormProvider, useForm} from 'react-hook-form';
+import {yupResolver} from '@hookform/resolvers/yup';
+import * as yup from 'yup';
 type Props = {};
 
 const Login = (props: Props) => {
   const navigation = useNavigation<any>();
   const {top: paddingTop} = useSafeAreaInsets();
+  const form = useForm({
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+    resolver: yupResolver(
+      yup.object().shape({
+        email: yup
+          .string()
+          .email('Invalid email')
+          .required('Email is required'),
+        password: yup
+          .string()
+          .min(6, 'Password must be at least 6 characters')
+          .required('Password is required'),
+      }),
+    ),
+  });
+
+  const handleSubmit = (values: any) => {
+    console.log('values', values);
+  };
   return (
     <View style={[styles.container, {paddingTop}]}>
       <View style={styles.viewHeader}>
@@ -19,24 +43,30 @@ const Login = (props: Props) => {
       </View>
 
       <View style={styles.viewForm}>
-        <CInput
-          label="Email"
-          placeholder="Enter your email"
-          icon="mail-outline"
-        />
-        <CInput
-          label="Password"
-          placeholder="Enter your password"
-          icon="lock-closed-outline"
-          isPassword
-        />
+        <FormProvider {...form}>
+          <CInput
+            label="Email"
+            placeholder="Enter your email"
+            icon="mail-outline"
+            name="email"
+          />
+          <CInput
+            label="Password"
+            placeholder="Enter your password"
+            icon="lock-closed-outline"
+            isPassword
+            name="password"
+          />
+        </FormProvider>
 
         <TouchableOpacity style={styles.btnForgot}>
           <Text style={styles.txtForgot}>Forgot Password?</Text>
         </TouchableOpacity>
 
         <View style={styles.viewBtn}>
-          <TouchableOpacity style={styles.btnLogin}>
+          <TouchableOpacity
+            style={styles.btnLogin}
+            onPress={() => form.handleSubmit(handleSubmit)()}>
             <Text style={styles.txtLogin}>Login</Text>
           </TouchableOpacity>
 
